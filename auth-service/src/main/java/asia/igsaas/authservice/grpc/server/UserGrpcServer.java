@@ -3,20 +3,26 @@ package asia.igsaas.authservice.grpc.server;
 import asia.igsaas.grpc.user.*;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 
 import java.util.*;
 
+@Slf4j
 @GrpcService
 public class UserGrpcServer extends UserServiceGrpc.UserServiceImplBase {
 
-    // In-memory store for demonstration
     private final Map<String, User> userStore = new HashMap<>();
 
     public UserGrpcServer() {
-        userStore.put("1", User.newBuilder().setId("1").setName("John").setEmail("john@doe.com").build());
-        userStore.put("2", User.newBuilder().setId("2").setName("Jane").setEmail("jane@doe.com").build());
-        userStore.put("3", User.newBuilder().setId("3").setName("Bob").setEmail("bob@doe.com").build());
+        String id1 = UUID.randomUUID().toString();
+        userStore.put(id1, User.newBuilder().setId(id1).setName("John").setEmail("john@doe.com").build());
+
+        String id2 = UUID.randomUUID().toString();
+        userStore.put(id2, User.newBuilder().setId(id2).setName("Jane").setEmail("jane@doe.com").build());
+
+        String id3 = UUID.randomUUID().toString();
+        userStore.put(id3, User.newBuilder().setId(id3).setName("Bob").setEmail("bob@doe.com").build());
     }
 
     @Override
@@ -49,6 +55,7 @@ public class UserGrpcServer extends UserServiceGrpc.UserServiceImplBase {
     public void getUser(GetUserRequest request,
                         StreamObserver<UserResponse> responseObserver) {
         try {
+            System.out.println(request.getId());
             User user = userStore.get(request.getId());
             if (user == null) {
                 responseObserver.onError(Status.NOT_FOUND
@@ -83,62 +90,6 @@ public class UserGrpcServer extends UserServiceGrpc.UserServiceImplBase {
         } catch (Exception e) {
             responseObserver.onError(Status.INTERNAL
                     .withDescription("Error fetching users: " + e.getMessage())
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void updateUser(UpdateUserRequest request,
-                           StreamObserver<UpdateUserResponse> responseObserver) {
-        try {
-            if (!userStore.containsKey(request.getId())) {
-                responseObserver.onError(Status.NOT_FOUND
-                        .withDescription("User not found")
-                        .asRuntimeException());
-                return;
-            }
-
-            User updatedUser = User.newBuilder()
-                    .setId(request.getId())
-                    .setName(request.getName())
-                    .setEmail(request.getEmail())
-                    .build();
-
-            userStore.put(request.getId(), updatedUser);
-
-            responseObserver.onNext(UpdateUserResponse.newBuilder()
-                    .setMessage("User updated successfully")
-                    .build());
-            responseObserver.onCompleted();
-
-        } catch (Exception e) {
-            responseObserver.onError(Status.INTERNAL
-                    .withDescription("Error updating user: " + e.getMessage())
-                    .asRuntimeException());
-        }
-    }
-
-    @Override
-    public void deleteUser(DeleteUserRequest request,
-                           StreamObserver<DeleteUserResponse> responseObserver) {
-        try {
-            if (!userStore.containsKey(request.getId())) {
-                responseObserver.onError(Status.NOT_FOUND
-                        .withDescription("User not found")
-                        .asRuntimeException());
-                return;
-            }
-
-            userStore.remove(request.getId());
-
-            responseObserver.onNext(DeleteUserResponse.newBuilder()
-                    .setMessage("User deleted successfully")
-                    .build());
-            responseObserver.onCompleted();
-
-        } catch (Exception e) {
-            responseObserver.onError(Status.INTERNAL
-                    .withDescription("Error deleting user: " + e.getMessage())
                     .asRuntimeException());
         }
     }

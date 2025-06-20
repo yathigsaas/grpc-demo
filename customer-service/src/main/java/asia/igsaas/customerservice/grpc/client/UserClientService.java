@@ -6,11 +6,9 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 
-import org.slf4j.Marker;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.logging.Level;
 
 @Service
 @Slf4j
@@ -22,21 +20,21 @@ public class UserClientService {
     /**
      * Create a new user.
      */
-    public CreateUserResponse createUser(CreateUserRequest request) {
-        log.info("Creating user with name: " + request.getName() + ", email: " + request.getEmail());
-//        CreateUserRequest request = CreateUserRequest.newBuilder()
-//                .setName(name)
-//                .setEmail(email)
-//                .build();
-        CreateUserResponse response;
+    public String  createCustomer(CustomerDto customerDto) {
         try {
-            response = blockingStub.createUser(request);
+            log.info("Creating user with name: " + customerDto.getName() + ", email: " + customerDto.getEmail());
+            CreateUserRequest request = CreateUserRequest.newBuilder()
+                    .setName(customerDto.getName())
+                    .setEmail(customerDto.getEmail())
+                    .build();
+            CreateUserResponse  response = blockingStub.createUser(request);
+
             log.info("Created user with id: " + response.getId());
+            return response.getId();
         } catch (StatusRuntimeException e) {
             log.warn("RPC failed: {}", e.getStatus());
             throw e;
         }
-        return response;
     }
 
     /**
@@ -76,46 +74,8 @@ public class UserClientService {
         }
     }
 
-    /**
-     * Update a user.
-     */
-    public UpdateUserResponse updateUser(String id, String name, String email) {
-        log.info("Updating user with id: " + id);
-        UpdateUserRequest request = UpdateUserRequest.newBuilder()
-                .setId(id)
-                .setName(name)
-                .setEmail(email)
-                .build();
-        UpdateUserResponse response;
-        try {
-            response = blockingStub.updateUser(request);
-            log.info("Updated user: " + id);
-            return response;
-        } catch (StatusRuntimeException e) {
-            log.warn("RPC failed: {}", e.getStatus());
-            throw e;
-        }
-    }
-
-    /**
-     * Delete a user.
-     */
-    public DeleteUserResponse deleteUser(String id) {
-        log.info("Deleting user with id: " + id);
-        DeleteUserRequest request = DeleteUserRequest.newBuilder().setId(id).build();
-        DeleteUserResponse response;
-        try {
-            response = blockingStub.deleteUser(request);
-            log.info("Deleted user: " + id);
-            return response;
-        } catch (StatusRuntimeException e) {
-            log.warn("RPC failed {0}: {}", e.getStatus());
-            throw e;
-        }
-    }
-
     // Helper method to convert User to CustomerDto
-    private CustomerDto convertToCustomerDto(User user) {
+    public CustomerDto convertToCustomerDto(User user) {
         return CustomerDto.builder()
                 .id(user.getId())
                 .name(user.getName())

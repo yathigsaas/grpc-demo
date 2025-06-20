@@ -2,10 +2,7 @@ package asia.igsaas.customerservice.customer;
 
 import asia.igsaas.customerservice.customer.dto.CustomerDto;
 import asia.igsaas.customerservice.grpc.client.UserClientService;
-import asia.igsaas.grpc.user.CreateUserRequest;
-import asia.igsaas.grpc.user.CreateUserResponse;
 import asia.igsaas.grpc.user.User;
-import asia.igsaas.grpc.user.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,23 +22,13 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public User getCustomer(@PathVariable String id) {
-        return userClientService.getUser(id);
+    public CustomerDto getCustomer(@PathVariable String id) {
+        final User user = userClientService.getUser(id);
+        return userClientService.convertToCustomerDto(user);
     }
 
-    @PostMapping()
-    public CreateUserResponse createCustomer(@RequestBody CreateUserRequest request) {
-        return userClientService.createUser(request);
+    @PostMapping("/create")
+    public String createCustomer(@RequestBody CustomerDto request) {
+        return userClientService.createCustomer(request);
     }
-//
-//    @PutMapping("/{id}")
-//    public CustomerEntity updateCustomer(@PathVariable String id, @RequestBody CustomerEntity customer) {
-//        return customerService.updateCustomer(id, customer);
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public void deleteCustomer(@PathVariable String id) {
-//        customerService.deleteCustomer(id);
-//    }
-
 }
