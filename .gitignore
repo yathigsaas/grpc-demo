@@ -1,0 +1,5 @@
+/auth-service/.gradle/
+/auth-service/build/
+/.idea/
+/customer-service/.gradle/
+/customer-service/build/
